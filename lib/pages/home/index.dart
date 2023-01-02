@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:new_app/pages/home/appDrawer.dart';
 import 'package:new_app/pages/settings/autoReply.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -11,7 +11,28 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   bool mainButtonPressed = false; //change this later for background process
-  String mode = "Off";
+
+  void loadSaved() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      mainButtonPressed = (prefs.getBool('is_safe_driving') ??
+          false); //if no value is there in counter then we assign 0 to the counter
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loadSaved();
+  }
+
+  void saveSafeDrivingMode() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      prefs.setBool('is_safe_driving', mainButtonPressed);
+    });
+  }
+
   int page_index = 0;
   final pages = [AutoReply()];
 
@@ -35,8 +56,7 @@ class _HomeState extends State<Home> {
                 page_index = 0;
               });
               Navigator.pop(context);
-            })
-            ,
+            }),
         ListTile(
             title: const Text("Auto-reply", style: TextStyle(fontSize: 20)),
             onTap: () {
@@ -57,12 +77,12 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _renderHome(BuildContext context) {
+  Widget _homePage(BuildContext context) {
     return ListView(
       children: [
         Center(
           child: Text(
-            "SafeDriving:" + mode,
+            "SafeDriving:" + (mainButtonPressed ? "On" : "Off"),
             style: TextStyle(
                 fontSize: 35, color: Colors.black, fontWeight: FontWeight.bold),
           ),
@@ -92,11 +112,7 @@ class _HomeState extends State<Home> {
               onPressed: () => {
                 setState(() {
                   mainButtonPressed = !mainButtonPressed;
-                  if (mode == "Off") {
-                    mode = "On";
-                  } else {
-                    mode = "Off";
-                  }
+                  saveSafeDrivingMode();
                 })
               },
               child: Icon(
@@ -107,8 +123,7 @@ class _HomeState extends State<Home> {
             )),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         body: Center(
-            child: page_index == 0
-                ? _renderHome(context)
-                : pages[page_index - 1]));
+            child:
+                page_index == 0 ? _homePage(context) : pages[page_index - 1]));
   }
 }
