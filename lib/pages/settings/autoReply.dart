@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+
 class AutoReply extends StatefulWidget {
   const AutoReply({Key? key}) : super(key: key);
 
@@ -41,7 +42,7 @@ class _AutoReplyState extends State<AutoReply> {
   void saveAuto() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
-      _is_saved_auto = (prefs.getInt('is_saved_auto') ?? 0);
+      _is_saved_auto = (prefs.getInt('is_saved_auto') ??0);
       if (_is_saved_auto != 0) {
         _is_saved_auto = 0;
         prefs.setInt('is_saved_auto', 0);
@@ -144,14 +145,14 @@ class _AutoReplyState extends State<AutoReply> {
                               if (_formKey.currentState!.validate()) {
                                 // If the form is valid, display a snackbar. In the real world,
                                 // you'd often call a server or save the information in a database.
+                                reply_text= msgController.text.toString();
+                                saveText();
+
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Text('New custom message set!')),
                                 );
                               }
-                              reply_text= msgController.text.toString();
-                              saveText();
-                              //save the
                             },
                       child: Text(
                         "Confirm",

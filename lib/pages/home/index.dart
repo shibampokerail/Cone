@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:new_app/pages/settings/autoReply.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter/services.dart';
+import 'package:sound_mode/sound_mode.dart';
+import 'package:sound_mode/permission_handler.dart';
+import 'package:app_settings/app_settings.dart';
+import 'package:sound_mode/utils/ringer_mode_statuses.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -11,7 +16,45 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   bool mainButtonPressed = false; //change this later for background process
+  String _permissionStatus = "";
 
+  //for putting the phone on silent | need to get notification permission for android 7.0 and above
+  void getPermissionStatus() async {
+    bool? permissionStatus = false;
+    try {
+      permissionStatus = await PermissionHandler.permissionsGranted;
+      print(permissionStatus);
+      if (permissionStatus == false) {
+        displayAlertDialog(context);
+      }
+      permissionStatus = await PermissionHandler.permissionsGranted;
+      print(permissionStatus);
+    } catch (err) {
+      print(err);
+    }
+
+    setState(() {
+      _permissionStatus =
+      permissionStatus! ? "Permissions Enabled" : "Permissions not granted";
+    });
+    print(_permissionStatus);
+  }
+  void _setSilentMode() async {
+    RingerModeStatus status;
+
+    try {
+      status = await SoundMode.setSoundMode(mainButtonPressed ? RingerModeStatus.silent : RingerModeStatus.normal);
+
+      // setState(() {
+      //   _soundMode = status;
+      // });
+    } on PlatformException {
+      print('Do Not Disturb access permissions required!');
+    }
+  }
+
+
+  //loading the saved settings
   void loadSaved() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -24,8 +67,10 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     loadSaved();
+    getPermissionStatus();
   }
 
+  //saving settings set by the user
   void saveSafeDrivingMode() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -108,12 +153,16 @@ class _HomeState extends State<Home> {
               //<-- SEE HERE
 
               backgroundColor:
-                  mainButtonPressed ? Colors.lightGreen : Colors.red,
-              onPressed: () => {
+              mainButtonPressed ? Colors.lightGreen : Colors.red,
+              onPressed: () =>
+              {
                 setState(() {
                   mainButtonPressed = !mainButtonPressed;
                   saveSafeDrivingMode();
-                })
+                  _setSilentMode();
+                }                )
+
+
               },
               child: Icon(
                 Icons.power_settings_new,
@@ -124,6 +173,32 @@ class _HomeState extends State<Home> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         body: Center(
             child:
-                page_index == 0 ? _homePage(context) : pages[page_index - 1]));
+            page_index == 0 ? _homePage(context) : pages[page_index - 1]));
   }
+}
+
+displayAlertDialog(BuildContext context) {
+  Widget okButton = TextButton(
+    child: Text("OK"),
+    onPressed: () {
+      PermissionHandler.openDoNotDisturbSetting();
+      Navigator.pop(context);},
+  );
+
+  // set up the AlertDialog
+  AlertDialog alert = AlertDialog(
+    title: Text("Permission Access"),
+    content: Text("In order to use our application you will need to grant access to notification."),
+    actions: [
+      okButton,
+    ],
+  );
+
+  // show the dialog
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return alert;
+    },
+  );
 }
