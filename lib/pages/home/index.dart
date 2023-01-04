@@ -7,8 +7,8 @@ import 'package:flutter/services.dart';
 import 'package:sound_mode/sound_mode.dart';
 import 'package:sound_mode/permission_handler.dart';
 import 'package:sound_mode/utils/ringer_mode_statuses.dart';
-import 'package:sms_advanced/sms_advanced.dart';
 import 'package:new_app/features/permissions.dart';
+import 'package:new_app/pages/settings/messages.dart';
 
 
 
@@ -22,13 +22,13 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int page_index = 0;
-  final pages = [AutoReply()];
+  final pages = [AutoReply(),Messages()];
 
   @override
   void initState() {
     super.initState();
     loadSaved();
-    getPermissionStatus();
+    getDoNotDisturbPermission();
 
 
   }
@@ -38,7 +38,7 @@ class _HomeState extends State<Home> {
 
 
   //for putting the phone on silent | need to get do not disturb permission for android 7.0 and above
-  void getPermissionStatus() async {
+  void getDoNotDisturbPermission() async {
     bool? permissionStatus = false;
     try {
       permissionStatus = await PermissionHandler.permissionsGranted;
@@ -48,7 +48,7 @@ class _HomeState extends State<Home> {
         if (Platform.isAndroid){
           AskDoNotDisturbPermission(context);
         } else {
-          print("IOS do not disturb settings not configured...");
+          print("IOS do not disturb settings not configured...(ignore unless testing in IOS)");
         }
 
         //permission for sms is not invoked here because for some reason asks  automatically
@@ -131,8 +131,14 @@ class _HomeState extends State<Home> {
               Navigator.pop(context);
             }),
         ListTile(
-            title: const Text("About", style: TextStyle(fontSize: 20)),
-            onTap: () {}),
+            title: const Text("Messages", style: TextStyle(fontSize: 20)),
+            onTap: () {
+              setState(() {
+                page_index = 2;
+
+              });
+              Navigator.pop(context);
+            }),
         ListTile(
             title: const Text("Back", style: TextStyle(fontSize: 20)),
             onTap: () {
@@ -154,11 +160,8 @@ class _HomeState extends State<Home> {
               style: TextStyle(
                   fontSize: 35, color: Colors.black, fontWeight: FontWeight.bold),
             ),
-
-
           ),
         ),
-    // Text(threads[0].contact?.address ?? 'empty')
       ],
     );
   }
@@ -198,6 +201,7 @@ class _HomeState extends State<Home> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         body: Center(
             child:
+
             page_index == 0 ? buildHomePage(context) : pages[page_index - 1]
             ));
   }

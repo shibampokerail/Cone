@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:new_app/features/permissions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sms_advanced/sms_advanced.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:app_settings/app_settings.dart';
 
@@ -18,11 +17,18 @@ class _AutoReplyState extends State<AutoReply> {
   String user_input_text = "";
   final msgController = TextEditingController();
 
+  @override
+  void initState() {
+    super.initState();
+    loadSaved();
+    loadSavedText();
+  }
+
   void loadSaved() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       _is_saved_auto = (prefs.getInt('is_saved_auto') ??
-          0); //if no value is there in counter then we assign 0 to the counter
+          0);//if no value is there then we assign 0
     });
   }
 
@@ -35,22 +41,6 @@ class _AutoReplyState extends State<AutoReply> {
     });
   }
 
-  void sms_reader() async {
-    final SmsQuery query = SmsQuery();
-    List<SmsThread> threads = [];
-    query.getAllThreads.then((value) {
-      threads = value;
-      setState(() {});
-    });
-    // Text(threads[0].contact?.address ?? 'empty');
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    loadSaved();
-    loadSavedText();
-  }
 
   //save whether auto reply is on 0 means off 1 is on
   void saveAuto() async {
