@@ -36,6 +36,7 @@ dependencies:
   telephony: ^0.2.0 #for android sms handling
   permission_handler: ^10.2.0
   app_settings: 4.1.8
+  workmanager: ^0.5.1
 
 
 

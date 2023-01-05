@@ -13,6 +13,7 @@ class AutoReply extends StatefulWidget {
 
 class _AutoReplyState extends State<AutoReply> {
   int _is_saved_auto = 0;
+  bool is_safe_driving_mode_on = false;
   String reply_text = "";
   String user_input_text = "";
   final msgController = TextEditingController();
@@ -26,9 +27,16 @@ class _AutoReplyState extends State<AutoReply> {
 
   void loadSaved() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    is_safe_driving_mode_on = (prefs.getBool('is_safe_driving') ?? false);
+
+    if (!is_safe_driving_mode_on) {
+      //if safe driving mode is on
+      prefs.setInt('is_saved_auto', 0);
+    }
+
     setState(() {
       _is_saved_auto = (prefs.getInt('is_saved_auto') ??
-          0);//if no value is there then we assign 0
+          0); //if no value is there then we assign 0
     });
   }
 
@@ -41,7 +49,6 @@ class _AutoReplyState extends State<AutoReply> {
     });
   }
 
-
   //save whether auto reply is on 0 means off 1 is on
   void saveAuto() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -52,12 +59,22 @@ class _AutoReplyState extends State<AutoReply> {
       //add more permission to request here.
     ].request();
 
-
     setState(() {
+      bool is_safe_driving = (prefs.getBool('is_safe_driving') ?? false);
+
+      if (!is_safe_driving) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'SafeDriving mode off',
+              style: TextStyle(color: Colors.redAccent),
+            ),
+          ),
+        );
+        return;
+      }
+
       _is_saved_auto = (prefs.getInt('is_saved_auto') ?? 0);
-
-
-
       if (statuses[Permission.sms] == PermissionStatus.granted &&
           statuses[Permission.contacts] == PermissionStatus.granted) {
         if (_is_saved_auto == 1) {
@@ -67,7 +84,8 @@ class _AutoReplyState extends State<AutoReply> {
           _is_saved_auto = 1;
           prefs.setInt('is_saved_auto', 1);
         }
-      } else { //if permissions are denied then reset the permissions
+      } else {
+        //if permissions are denied then reset the permissions
         prefs.setInt('is_saved_auto', 0);
         _is_saved_auto = 0;
       }
@@ -114,7 +132,8 @@ class _AutoReplyState extends State<AutoReply> {
                     //if any of the permissions are denied then the auto-reply feature will not turn on
                     if (statuses[Permission.sms] == PermissionStatus.granted &&
                         statuses[Permission.contacts] ==
-                            PermissionStatus.granted) { //do nothing
+                            PermissionStatus.granted) {
+                      //do nothing
                     } else {
                       Map<Permission, PermissionStatus> statuses = await [
                         Permission.sms,
@@ -124,22 +143,33 @@ class _AutoReplyState extends State<AutoReply> {
                     }
 
                     setState(() {
-                      if (statuses[Permission.sms] ==
-                              PermissionStatus.granted &&
-                          statuses[Permission.contacts] ==
-                              PermissionStatus.granted) {
-                        _is_saved_auto = _is_saved_auto == 0 ? 1 : 0;
+                      if ((statuses[Permission.sms] ==
+                              PermissionStatus.granted) &&
+                          (statuses[Permission.contacts] ==
+                              PermissionStatus.granted)) {
+                        if (is_safe_driving_mode_on) {
+                          _is_saved_auto = _is_saved_auto == 0 ? 1 : 0;
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'SafeDriving mode off',
+                                style: TextStyle(color: Colors.redAccent),
+                              ),
+                            ),
+                          );
+                          return;
+                        }
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
                               content: Text(
-                            'Permissions not granted',
-                            style: TextStyle(color: Colors.redAccent),
-
-                          ),
-                              action: SnackBarAction(label: 'Settings', onPressed:AppSettings.openAppSettings
-                          )
-                          ),
+                                'Permissions not granted',
+                                style: TextStyle(color: Colors.redAccent),
+                              ),
+                              action: SnackBarAction(
+                                  label: 'Settings',
+                                  onPressed: AppSettings.openAppSettings)),
                         );
                       }
                     });
