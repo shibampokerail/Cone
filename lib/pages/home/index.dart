@@ -39,7 +39,7 @@ class _HomeState extends State<Home> {
   void IncomingMessageHandler() async {
     bool features_are_running = await loadSaved();
     features_are_running ?
-      foregroundMessageHandler(telephony, true):
+      foregroundMessageHandler(telephony, true, debug:true):
         null;
   }
 

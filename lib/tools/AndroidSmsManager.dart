@@ -92,8 +92,11 @@ foregroundMessageHandler(telephony, bool runInBackground, {bool debug=false}) as
           message: (prefs.getString(
               'saved_text') ?? //if no value is there in saved text then we assign default auto reply message to the counter
               "I am currently driving right now. I will get back to you later."));
+      print("replied to text $text from:$phone_number");
+    } else {
+      print("received a text from $phone_number.");
     }
-    print("replied to text $text from:$phone_number");
+
   },listenInBackground: runInBackground,
       onBackgroundMessage:backgroundMessageHandler
   );

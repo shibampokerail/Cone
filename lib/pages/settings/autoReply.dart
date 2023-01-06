@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:new_app/tools/permissionsManager.dart';
+import 'package:new_app/tools/AndroidSmsManager.dart';
 
 class AutoReply extends StatefulWidget {
   const AutoReply({Key? key}) : super(key: key);
@@ -124,6 +125,8 @@ class _AutoReplyState extends State<AutoReply> {
                   // after countless hours of scouring pub.dev and stackoverflow
                   // i was finally able to request two permissions in a row in android
                   onChanged: (value) async {
+
+
                     Map<Permission, PermissionStatus> statuses = await [
                       Permission.sms,
                       Permission.contacts,
