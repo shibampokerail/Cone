@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sound_mode/permission_handler.dart';
+import 'package:flutter/src/material/colors.dart';
 
-AskDoNotDisturbPermission(BuildContext context) {
-
+alertDialogBox(BuildContext context, String title, String description) {
   Widget okButton = TextButton(
     child: Text("OK"),
-    onPressed: () {
-
-      PermissionHandler.openDoNotDisturbSetting();
-      Navigator.pop(context);
-    },
+    onPressed: () {},
   );
 
   // set up the AlertDialog
   AlertDialog alert = AlertDialog(
-    title: Text("Permission Access"),
+    title: Text(title),
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
-    content: Text(
-        "In order to use our application you will need to grant access to Do not disturb."),
+    content: Text(description),
     actions: [
       okButton,
     ],
@@ -31,4 +26,14 @@ AskDoNotDisturbPermission(BuildContext context) {
       return alert;
     },
   );
+}
+
+showSnackBar(context, String description, String button_text, {Color col= Colors.white}) {
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    content: Text(
+      description,
+      style: TextStyle(color: col),
+    ),
+    action: SnackBarAction(label: button_text, onPressed: () {}),
+  ));
 }

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:new_app/features/permissions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:app_settings/app_settings.dart';
+import 'package:new_app/tools/permissionsManager.dart';
 
 class AutoReply extends StatefulWidget {
   const AutoReply({Key? key}) : super(key: key);
@@ -161,16 +161,7 @@ class _AutoReplyState extends State<AutoReply> {
                           return;
                         }
                       } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                              content: Text(
-                                'Permissions not granted',
-                                style: TextStyle(color: Colors.redAccent),
-                              ),
-                              action: SnackBarAction(
-                                  label: 'Settings',
-                                  onPressed: AppSettings.openAppSettings)),
-                        );
+                       NotifyPermissionsNotGranted(context);
                       }
                     });
                     // contact and sms permissions requested in the section above
