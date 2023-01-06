@@ -5,14 +5,14 @@ import 'package:app_settings/app_settings.dart';
 import 'package:new_app/tools/permissionsManager.dart';
 import 'package:new_app/tools/AndroidSmsManager.dart';
 
-class AutoReply extends StatefulWidget {
-  const AutoReply({Key? key}) : super(key: key);
+class AutoReplyPage extends StatefulWidget {
+  const AutoReplyPage({Key? key}) : super(key: key);
 
   @override
-  State<AutoReply> createState() => _AutoReplyState();
+  State<AutoReplyPage> createState() => _AutoReplyState();
 }
 
-class _AutoReplyState extends State<AutoReply> {
+class _AutoReplyState extends State<AutoReplyPage> {
   int _is_saved_auto = 0;
   bool is_safe_driving_mode_on = false;
   String reply_text = "";

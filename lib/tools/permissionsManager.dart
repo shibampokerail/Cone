@@ -3,16 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:sound_mode/permission_handler.dart';
 import 'package:app_settings/app_settings.dart';
 
-void contact_permission() async {
-  Permission contac_perm = await Permission.contacts;
-  var cntct_permission = await contac_perm.request();
+void request_contact_permission() async {
+  await Permission.contacts.request();
+
 }
 
-void sms_permission() async {
-  Permission message_perm = await Permission.sms;
-  var msg_permission = await message_perm.request();
+void request_sms_permission() async {
+  await Permission.sms.request();
 }
 
+//only for android
 AskDoNotDisturbPermission(BuildContext context) {
   Widget okButton = TextButton(
     child: Text("OK"),

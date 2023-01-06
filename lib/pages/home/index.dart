@@ -2,17 +2,14 @@ import 'dart:io';
 
 //packages
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/services.dart';
-import 'package:sound_mode/sound_mode.dart';
-import 'package:sound_mode/permission_handler.dart';
-import 'package:sound_mode/utils/ringer_mode_statuses.dart';
 import 'package:telephony/telephony.dart';
 
 //extension
 import 'package:new_app/pages/settings/autoReply.dart';
 import 'package:new_app/tools/permissionsManager.dart';
 import 'package:new_app/tools/AndroidSmsManager.dart';
+import 'package:new_app/tools/featuresHandler.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -23,7 +20,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int page_index = 0;
-  final pages = [AutoReply()];
+  final pages = [AutoReplyPage()];
 
   final Telephony telephony = Telephony.instance;
   bool mainButtonPressed = false;
@@ -33,61 +30,22 @@ class _HomeState extends State<Home> {
     super.initState();
     loadSaved();
     getDoNotDisturbPermission(context);
-    IncomingMessageHandler();
+    RunAutoReply();
   }
 
-  void IncomingMessageHandler() async {
-    bool features_are_running = await loadSaved();
-    features_are_running ?
-      foregroundMessageHandler(telephony, true, debug:true):
-        null;
-  }
-
-  //changes the sound mode of the phone to do not disturb when normal and vice versa
-  void _setSilentMode() async {
-    //https://pub.dev/packages/sound_mode >> ios usage
-    //for ios implementation
-
-    RingerModeStatus status;
-
-    try {
-      status = await SoundMode.setSoundMode(mainButtonPressed
-          ? RingerModeStatus.silent
-          : RingerModeStatus.normal);
-      // setState(() {
-      //   _soundMode = status;
-      // });
-    } on PlatformException {
-      print('Do Not Disturb access permissions required!');
-    }
+  void RunAutoReply() async {
+    bool features_are_running = (await SafeDriving().is_turned_on()) &&
+        (await AutoReply().is_turned_on());
+    features_are_running
+        ? foregroundMessageHandler(telephony, true, debug: true)
+        : null;
   }
 
   //loading the saved settings for safe-driving
-  Future<bool> loadSaved() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  void loadSaved() async {
+    bool saved_setting = await SafeDriving().is_turned_on();
     setState(() {
-      mainButtonPressed = (prefs.getBool('is_safe_driving') ??
-          false); //if no value is there in counter then we assign 0 to the counter
-    });
-
-    int _is_saved_auto = (prefs.getInt('is_saved_auto') ?? 0);
-    print("autoreply_feature:$_is_saved_auto");
-    if (mainButtonPressed && (_is_saved_auto==1)){
-      return true;
-    } else
-      {
-        return false;
-      }
-  }
-
-  //saving settings set by the user
-  void saveSafeDrivingMode() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      prefs.setBool('is_safe_driving', mainButtonPressed);
-      bool a = prefs.getBool('is_safe_driving') ?? false;
-      print(a);
-      print(mainButtonPressed.toString());
+      mainButtonPressed = saved_setting;
     });
   }
 
@@ -169,7 +127,8 @@ class _HomeState extends State<Home> {
           child: _buildAppDrawer(context),
         ),
         floatingActionButton: Visibility(
-            visible: page_index == 0 ? true : false, //the main button is visible only in the homepage
+            visible: page_index == 0 ? true : false,
+            //the main button is visible only in the homepage
             child: FloatingActionButton.large(
               //<-- SEE HERE
               backgroundColor:
@@ -177,8 +136,10 @@ class _HomeState extends State<Home> {
               onPressed: () => {
                 setState(() {
                   mainButtonPressed = !mainButtonPressed;
-                  saveSafeDrivingMode();
-                  _setSilentMode();
+                  mainButtonPressed
+                      ? SafeDriving().turn_on()
+                      : SafeDriving().turn_off();
+
                 })
               },
               child: Icon(

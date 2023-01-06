@@ -10,7 +10,7 @@ class RouteManager extends StatelessWidget {
         initialRoute: "/",
         routes: {
           "/": (context) => Home(),
-          "/autoReply": (context) => AutoReply(),
+          "/autoReply": (context) => AutoReplyPage(),
         });
   }
 }
