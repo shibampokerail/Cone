@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:sound_mode/utils/ringer_mode_statuses.dart';
 import 'package:telephony/telephony.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:workmanager/workmanager.dart';
-
+import 'package:new_app/tools/status.dart';
+import 'package:new_app/tools/featuresHandler.dart';
 const taskName = "replyIncomingMessages";
 
 // Future<void> replyIncomingMessages() async {
@@ -55,23 +57,31 @@ const taskName = "replyIncomingMessages";
 
 
 backgroundMessageHandler(SmsMessage message) async {
-    final Telephony telephony = Telephony.instance;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String phone_number =  message.address.toString();
-    int is_auto_reply_on = (prefs.getInt('is_saved_auto') ?? 0);
-    bool is_safe_driving_mode_on = (prefs.getBool('is_safe_driving') ?? false);
-    print(is_auto_reply_on.toString()+is_safe_driving_mode_on.toString());
+    int is_auto_reply_on = (await AutoReply().is_running()) ? 1 : 0;
+    bool is_safe_driving_mode_on = false;
+    var sound_mode = await Device().sound_mode();
+    print(sound_mode.toString());
+    if (sound_mode==RingerModeStatus.silent){
+      is_safe_driving_mode_on = true;
+    }
+    print("autoreply:"+is_auto_reply_on.toString()+" Safedriving:"+is_safe_driving_mode_on.toString());
+
     if ((is_auto_reply_on == 1) && (is_safe_driving_mode_on)) {
-      telephony.sendSms(
+      Telephony.backgroundInstance.sendSms(
           to: phone_number,
           message: (prefs.getString(
               'saved_text') ?? //if no value is there in saved text then we assign default auto reply message to the counter
               "I am currently driving right now. I will get back to you later."));
+      print("replied to $phone_number");
+    } else {
+      print("did not reply to $phone_number");
     }
-    print(phone_number);
+
 }
 
-foregroundMessageHandler(telephony, bool runInBackground, {bool debug=false}) async {
+foregroundMessageHandler(telephony, {bool debug=false, bool runInBackground=true}) async {
   if (debug){
     print("foregroundMessageHandler is running");
     if (runInBackground){
@@ -79,14 +89,16 @@ foregroundMessageHandler(telephony, bool runInBackground, {bool debug=false}) as
     }
   }
   SharedPreferences prefs = await SharedPreferences.getInstance();
-
+  Future<bool> is_auto_reply = AutoReply().is_running();
+  Future<bool> is_safe_driving_mode = SafeDriving().is_running("FOREGROUND MESSAGE HANDLER");
+  bool is_safe_driving_mode_on = await is_safe_driving_mode;
+  bool is_auto_reply_on =  await is_auto_reply;
   telephony.listenIncomingSms(onNewMessage:(SmsMessage message){
     String phone_number =  message.address.toString();
     String text=message.body.toString();
-    int is_auto_reply_on = (prefs.getInt('is_saved_auto') ?? 0);
-    bool is_safe_driving_mode_on = (prefs.getBool('is_safe_driving') ?? false);
+
     print(is_auto_reply_on.toString()+is_safe_driving_mode_on.toString());
-    if ((is_auto_reply_on == 1) && (is_safe_driving_mode_on)) {
+    if ((is_auto_reply_on) && (is_safe_driving_mode_on)) {
       telephony.sendSms(
           to: phone_number,
           message: (prefs.getString(

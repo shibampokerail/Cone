@@ -7,7 +7,6 @@ import 'package:telephony/telephony.dart';
 
 //extension
 import 'package:new_app/pages/settings/autoReply.dart';
-import 'package:new_app/tools/permissionsManager.dart';
 import 'package:new_app/tools/AndroidSmsManager.dart';
 import 'package:new_app/tools/featuresHandler.dart';
 
@@ -29,21 +28,13 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
     loadSaved();
-    getDoNotDisturbPermission(context);
-    RunAutoReply();
-  }
-
-  void RunAutoReply() async {
-    bool features_are_running = (await SafeDriving().is_turned_on()) &&
-        (await AutoReply().is_turned_on());
-    features_are_running
-        ? foregroundMessageHandler(telephony, true, debug: true)
-        : null;
+    SafeDriving().permission(context);
+    AutoReply().runIncomingSmsHandler(telephony);
   }
 
   //loading the saved settings for safe-driving
   void loadSaved() async {
-    bool saved_setting = await SafeDriving().is_turned_on();
+    bool saved_setting = await SafeDriving().is_running("LOADSAVEDINDEX");
     setState(() {
       mainButtonPressed = saved_setting;
     });
@@ -133,14 +124,18 @@ class _HomeState extends State<Home> {
               //<-- SEE HERE
               backgroundColor:
                   mainButtonPressed ? Colors.lightGreen : Colors.red,
-              onPressed: () => {
+              onPressed: () async {
+                bool safedriving_mode = await SafeDriving().is_running("INDEX ONPRESSED");
+                bool auto_reply_mode = await AutoReply().is_running();
                 setState(() {
                   mainButtonPressed = !mainButtonPressed;
                   mainButtonPressed
                       ? SafeDriving().turn_on()
                       : SafeDriving().turn_off();
-
-                })
+                  auto_reply_mode
+                      ? AutoReply().turn_on()
+                      : AutoReply().turn_off();
+                });
               },
               child: Icon(
                 Icons.power_settings_new,

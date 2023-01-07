@@ -28,11 +28,12 @@ alertDialogBox(BuildContext context, String title, String description) {
   );
 }
 
-showSnackBar(context, String description, String button_text, {Color col= Colors.white}) {
+showSnackBar(context, String description,
+    {String button_text = "", bool button = false, Color color = Colors.white}) {
   ScaffoldMessenger.of(context).showSnackBar(SnackBar(
     content: Text(
       description,
-      style: TextStyle(color: col),
+      style: TextStyle(color: color),
     ),
     action: SnackBarAction(label: button_text, onPressed: () {}),
   ));

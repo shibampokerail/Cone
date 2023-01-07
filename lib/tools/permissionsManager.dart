@@ -5,7 +5,6 @@ import 'package:app_settings/app_settings.dart';
 
 void request_contact_permission() async {
   await Permission.contacts.request();
-
 }
 
 void request_sms_permission() async {
