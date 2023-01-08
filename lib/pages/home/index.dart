@@ -7,7 +7,7 @@ import 'package:telephony/telephony.dart';
 
 //extension
 import 'package:new_app/pages/settings/autoReply.dart';
-import 'package:new_app/tools/AndroidSmsManager.dart';
+import 'package:new_app/pages/settings/drivingdetector.dart';
 import 'package:new_app/tools/featuresHandler.dart';
 
 class Home extends StatefulWidget {
@@ -19,7 +19,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int page_index = 0;
-  final pages = [AutoReplyPage()];
+  final pages = [AutoReplyPage(),detectDriving()];
 
   final Telephony telephony = Telephony.instance;
   bool mainButtonPressed = false;
@@ -72,9 +72,11 @@ class _HomeState extends State<Home> {
             }),
         ListTile(
             // for debug
-            title: const Text("About", style: TextStyle(fontSize: 20)),
+            title: const Text("Detect Driving", style: TextStyle(fontSize: 20)),
             onTap: () {
-              setState(() {});
+              setState(() {
+                page_index = 2;
+              });
               Navigator.pop(context);
             }),
         ListTile(

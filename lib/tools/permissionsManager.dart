@@ -2,6 +2,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:sound_mode/permission_handler.dart';
 import 'package:app_settings/app_settings.dart';
+import 'package:geolocator/geolocator.dart';
 
 void request_contact_permission() async {
   await Permission.contacts.request();
@@ -9,6 +10,10 @@ void request_contact_permission() async {
 
 void request_sms_permission() async {
   await Permission.sms.request();
+}
+
+void request_gps_permission() async {
+  await Permission.location.request();
 }
 
 //only for android
@@ -61,11 +66,6 @@ void getDoNotDisturbPermission(context) async {
     print(err);
   }
 
-  // setState(() {
-  //   _permissionStatus =
-  //   permissionStatus! ? "Permissions Enabled" : "Permissions not granted";
-  // });
-  // print(_permissionStatus);
 }
 
 NotifyPermissionsNotGranted(context) {
