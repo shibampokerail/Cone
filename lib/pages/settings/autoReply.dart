@@ -33,7 +33,7 @@ class _AutoReplyState extends State<AutoReplyPage> {
 
     var was_autoreply_on = await AutoReply().is_running();
     print("Autoreply_mode:$was_autoreply_on");
-    bool is_safe_driving_on = await SafeDriving().is_running("AUTOREPLY LOADSAVED");
+    bool is_safe_driving_on = await SafeDriving().is_running();
     setState(() {
       if (is_safe_driving_on && was_autoreply_on){
         _is_saved_auto = was_autoreply_on ? 1 : 0;
@@ -61,7 +61,7 @@ class _AutoReplyState extends State<AutoReplyPage> {
       //add more permission to request here.
     ].request();
 
-    bool is_safe_driving = (await SafeDriving().is_running("aUTOREPLY SAVEAUTO"));
+    bool is_safe_driving = (await SafeDriving().is_running());
     print("safe_driving:"+is_safe_driving.toString());
 
     setState(() {
@@ -128,7 +128,7 @@ class _AutoReplyState extends State<AutoReplyPage> {
                       Permission.contacts,
                       //add more permission to requests here.
                     ].request();
-                    bool safe_driving_mode = await SafeDriving().is_running("AUTOREPLY SWITCH");
+                    bool safe_driving_mode = await SafeDriving().is_running();
                     //if any of the permissions are denied then the auto-reply feature will not turn on
                     if (statuses[Permission.sms] == PermissionStatus.granted &&
                         statuses[Permission.contacts] ==

@@ -93,7 +93,7 @@ foregroundMessageHandler(telephony, {bool debug=false, bool runInBackground=true
     String phone_number =  message.address.toString();
     String text=message.body.toString();
     Future<bool> is_auto_reply = AutoReply().is_running();
-    Future<bool> is_safe_driving_mode = SafeDriving().is_running("FOREGROUND MESSAGE HANDLER");
+    Future<bool> is_safe_driving_mode = SafeDriving().is_running();
     bool is_safe_driving_mode_on = await is_safe_driving_mode;
     bool is_auto_reply_on =  await is_auto_reply;
 

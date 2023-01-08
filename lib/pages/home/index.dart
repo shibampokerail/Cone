@@ -34,7 +34,7 @@ class _HomeState extends State<Home> {
 
   //loading the saved settings for safe-driving
   void loadSaved() async {
-    bool saved_setting = await SafeDriving().is_running("LOADSAVEDINDEX");
+    bool saved_setting = await SafeDriving().is_running();
     setState(() {
       mainButtonPressed = saved_setting;
     });
@@ -125,7 +125,7 @@ class _HomeState extends State<Home> {
               backgroundColor:
                   mainButtonPressed ? Colors.lightGreen : Colors.red,
               onPressed: () async {
-                bool safedriving_mode = await SafeDriving().is_running("INDEX ONPRESSED");
+                bool safedriving_mode = await SafeDriving().is_running();
                 bool auto_reply_mode = await AutoReply().is_running();
                 setState(() {
                   mainButtonPressed = !mainButtonPressed;

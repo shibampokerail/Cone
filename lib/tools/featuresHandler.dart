@@ -20,7 +20,7 @@ class AutoReply {
     }
   }
   void runIncomingSmsHandler(telephony) async {
-    bool features_are_running = (await SafeDriving().is_running("INCOMING SMS HANDLER FEATURES")) &&
+    bool features_are_running = (await SafeDriving().is_running()) &&
         (await AutoReply().is_running());
     features_are_running
         ? foregroundMessageHandler(telephony, debug: true)
@@ -55,7 +55,7 @@ class SafeDriving {
   void _changeSoundMode() async {
     RingerModeStatus status;
     try {
-      status = await SoundMode.setSoundMode(await SafeDriving().is_running("CHANGESOUNDMODE FEATURES")
+      status = await SoundMode.setSoundMode(await SafeDriving().is_running()
           ? RingerModeStatus.silent
           : RingerModeStatus.normal);
     } on PlatformException {
@@ -63,10 +63,10 @@ class SafeDriving {
     }
   }
 
-  Future<bool> is_running(String PAGENAME) async {
+  Future<bool> is_running() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     bool _is_safe_driving_on = (prefs.getBool('is_safe_driving') ?? false);
-    print("Safe Driving is " + (_is_safe_driving_on ? "On" : "Off" + PAGENAME));
+    print("Safe Driving is " + (_is_safe_driving_on ? "On" : "Off"));
     return _is_safe_driving_on;
   }
 
