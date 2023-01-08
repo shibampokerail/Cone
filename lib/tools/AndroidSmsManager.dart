@@ -62,7 +62,6 @@ backgroundMessageHandler(SmsMessage message) async {
     int is_auto_reply_on = (await AutoReply().is_running()) ? 1 : 0;
     bool is_safe_driving_mode_on = false;
     var sound_mode = await Device().sound_mode();
-    print(sound_mode.toString());
     if (sound_mode==RingerModeStatus.silent){
       is_safe_driving_mode_on = true;
     }
@@ -89,13 +88,14 @@ foregroundMessageHandler(telephony, {bool debug=false, bool runInBackground=true
     }
   }
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  Future<bool> is_auto_reply = AutoReply().is_running();
-  Future<bool> is_safe_driving_mode = SafeDriving().is_running("FOREGROUND MESSAGE HANDLER");
-  bool is_safe_driving_mode_on = await is_safe_driving_mode;
-  bool is_auto_reply_on =  await is_auto_reply;
-  telephony.listenIncomingSms(onNewMessage:(SmsMessage message){
+
+  telephony.listenIncomingSms(onNewMessage:(SmsMessage message) async {
     String phone_number =  message.address.toString();
     String text=message.body.toString();
+    Future<bool> is_auto_reply = AutoReply().is_running();
+    Future<bool> is_safe_driving_mode = SafeDriving().is_running("FOREGROUND MESSAGE HANDLER");
+    bool is_safe_driving_mode_on = await is_safe_driving_mode;
+    bool is_auto_reply_on =  await is_auto_reply;
 
     print(is_auto_reply_on.toString()+is_safe_driving_mode_on.toString());
     if ((is_auto_reply_on) && (is_safe_driving_mode_on)) {

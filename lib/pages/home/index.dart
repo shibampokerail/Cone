@@ -121,7 +121,7 @@ class _HomeState extends State<Home> {
             visible: page_index == 0 ? true : false,
             //the main button is visible only in the homepage
             child: FloatingActionButton.large(
-              //<-- SEE HERE
+
               backgroundColor:
                   mainButtonPressed ? Colors.lightGreen : Colors.red,
               onPressed: () async {
@@ -136,6 +136,7 @@ class _HomeState extends State<Home> {
                       ? AutoReply().turn_on()
                       : AutoReply().turn_off();
                 });
+                AutoReply().runIncomingSmsHandler(telephony);
               },
               child: Icon(
                 Icons.power_settings_new,
