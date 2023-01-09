@@ -13,7 +13,7 @@ void request_sms_permission() async {
 }
 
 void request_gps_permission() async {
-  await Permission.location.request();
+  await Geolocator.requestPermission();
 }
 
 //only for android

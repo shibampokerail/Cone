@@ -3,6 +3,7 @@ import 'dart:io';
 //packages
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:new_app/main.dart';
 import 'package:telephony/telephony.dart';
 
 //extension
@@ -56,8 +57,10 @@ class _HomeState extends State<Home> {
         ),
         ListTile(
             title: const Text("Home", style: TextStyle(fontSize: 20)),
-            onTap: () {
+            onTap: () async {
+              bool saved_setting = await SafeDriving().is_running();
               setState(() {
+                mainButtonPressed = saved_setting;
                 page_index = 0;
               });
               Navigator.pop(context);
@@ -66,6 +69,7 @@ class _HomeState extends State<Home> {
             title: const Text("Auto-reply", style: TextStyle(fontSize: 20)),
             onTap: () {
               setState(() {
+
                 page_index = 1;
               });
               Navigator.pop(context);
