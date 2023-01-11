@@ -8,7 +8,9 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 alertDialogBox(BuildContext context, String title, String description) {
   Widget okButton = TextButton(
     child: Text("OK"),
-    onPressed: () {},
+    onPressed: () {
+      Navigator.pop(context);
+    },
   );
 
   // set up the AlertDialog
