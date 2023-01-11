@@ -12,7 +12,7 @@ import 'package:geocoding/geocoding.dart';
 import 'package:new_app/pages/settings/autoReply.dart';
 import 'package:new_app/pages/settings/advanced.dart';
 import 'package:new_app/tools/featuresHandler.dart';
-import 'package:new_app/custom_widgets/notifiers.dart';
+import 'package:new_app/tools/notificationsManager.dart';
 import 'package:new_app/tools/speed_limit.dart';
 
 class Home extends StatefulWidget {
@@ -47,6 +47,7 @@ class _HomeState extends State<Home> {
     loadSaved();
     SafeDriving().permission(context);
     AutoReply().runIncomingSmsHandler(telephony);
+    SafeDrivingNotificationController().initialize_listeners();
     AwesomeNotifications().dismiss(1);
     get_current_location();
   }

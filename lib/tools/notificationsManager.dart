@@ -64,6 +64,7 @@ class SafeDrivingNotificationController {
     } else {
       SafeDriving().turn_on();
     }
+    print("BRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR");
 
   }
 }

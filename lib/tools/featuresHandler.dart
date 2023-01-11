@@ -84,6 +84,7 @@ class SafeDriving {
   void turn_off() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     AwesomeNotifications().dismiss(1);
+    print("brrrrrrr");
     SafeDriving()._changeSoundMode();
     prefs.setBool('is_safe_driving', false);
   }
