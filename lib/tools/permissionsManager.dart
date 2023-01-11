@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:sound_mode/permission_handler.dart';
 import 'package:app_settings/app_settings.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 void request_contact_permission() async {
   await Permission.contacts.request();
@@ -14,6 +15,17 @@ void request_sms_permission() async {
 
 void request_gps_permission() async {
   await Geolocator.requestPermission();
+}
+
+void request_notification_permission() async {
+  AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+    if (!isAllowed) {
+      // This is just a basic example. For real apps, you must show some
+      // friendly dialog box before call the request method.
+      // This is very important to not harm the user experience
+      AwesomeNotifications().requestPermissionToSendNotifications();
+    }
+  });
 }
 
 //only for android
@@ -65,7 +77,6 @@ void getDoNotDisturbPermission(context) async {
   } catch (err) {
     print(err);
   }
-
 }
 
 NotifyPermissionsNotGranted(context) {

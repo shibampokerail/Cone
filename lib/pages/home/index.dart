@@ -1,14 +1,13 @@
-import 'dart:io';
-
 //packages
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:new_app/main.dart';
 import 'package:telephony/telephony.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 //extension
 import 'package:new_app/pages/settings/autoReply.dart';
-import 'package:new_app/pages/settings/drivingdetector.dart';
+import 'package:new_app/pages/settings/drivingdetectortest.dart';
 import 'package:new_app/tools/featuresHandler.dart';
 
 class Home extends StatefulWidget {
@@ -31,6 +30,8 @@ class _HomeState extends State<Home> {
     loadSaved();
     SafeDriving().permission(context);
     AutoReply().runIncomingSmsHandler(telephony);
+    AwesomeNotifications().dismiss(1);
+
   }
 
   //loading the saved settings for safe-driving
@@ -62,6 +63,8 @@ class _HomeState extends State<Home> {
               setState(() {
                 mainButtonPressed = saved_setting;
                 page_index = 0;
+                AwesomeNotifications().dismiss(1);
+
               });
               Navigator.pop(context);
             }),
@@ -153,7 +156,8 @@ class _HomeState extends State<Home> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         body: Center(
             child: page_index == 0
-                ? buildHomePage(context)
+            ? detectDriving()
+                // ? buildHomePage(context)
                 : pages[page_index - 1]));
   }
 }

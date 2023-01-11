@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:sound_mode/permission_handler.dart';
 import 'package:flutter/src/material/colors.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
+
 
 alertDialogBox(BuildContext context, String title, String description) {
   Widget okButton = TextButton(
@@ -37,4 +39,16 @@ showSnackBar(context, String description,
     ),
     action: SnackBarAction(label: button_text, onPressed: () {}),
   ));
+}
+
+createNotification(String title, String description, {int id=1, channel_key="basic_channel", action_type = ActionType.Default}){
+  AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: id,
+      channelKey: channel_key,
+      title: title,
+      body: description,
+      actionType: ActionType.Default,
+    ),
+  );
 }

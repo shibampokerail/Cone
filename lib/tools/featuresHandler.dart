@@ -1,10 +1,13 @@
 import 'dart:core';
 import 'package:flutter/src/services/message_codec.dart'; //for PlatFormException
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sound_mode/sound_mode.dart';
 import 'package:sound_mode/utils/ringer_mode_statuses.dart';
 import 'package:new_app/tools/permissionsManager.dart';
 import 'package:new_app/tools/AndroidSmsManager.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:new_app/custom_widgets/notifiers.dart';
 
 
 
@@ -30,6 +33,7 @@ class AutoReply {
   void turn_on() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     prefs.setInt('is_saved_auto', 1);
+
   }
 
   void turn_off() async {
@@ -73,14 +77,15 @@ class SafeDriving {
   void turn_on() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     SafeDriving()._changeSoundMode();
+    createNotification('SafeDriving Mode Is on', 'Tap this to turn off SafeDriving mode.');
     prefs.setBool('is_safe_driving', true);
   }
 
   void turn_off() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    AwesomeNotifications().dismiss(1);
     SafeDriving()._changeSoundMode();
     prefs.setBool('is_safe_driving', false);
-
   }
 
   void permission(context) {

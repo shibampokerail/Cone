@@ -8,4 +8,5 @@ class Device{
     status = await SoundMode.ringerModeStatus;
     return status;
   }
+
 }
