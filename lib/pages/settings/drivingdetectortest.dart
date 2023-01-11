@@ -5,10 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:new_app/tools/featuresHandler.dart';
 import 'package:new_app/custom_widgets/notifiers.dart';
-import 'package:new_app/tools/permissionsManager.dart';
-import 'package:new_app/tools/notificationsManager.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:new_app/tools/locations_mapper.dart';
 import 'package:new_app/tools/speed_limit.dart';
 
 

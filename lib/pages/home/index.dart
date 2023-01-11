@@ -15,7 +15,6 @@ import 'package:new_app/tools/featuresHandler.dart';
 import 'package:new_app/custom_widgets/notifiers.dart';
 import 'package:new_app/tools/speed_limit.dart';
 
-
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
 
@@ -25,7 +24,7 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   int page_index = 0;
-  final pages = [AutoReplyPage(),AdvancedSettings()];
+  final pages = [AutoReplyPage(), AdvancedSettings()];
 
   final Telephony telephony = Telephony.instance;
   bool mainButtonPressed = false;
@@ -34,7 +33,8 @@ class _HomeState extends State<Home> {
   double speed = 0;
   double speed2 = 0;
   String state = "";
-  // ask for location lettings
+
+  // ask for location lettings on first launch
   final LocationSettings locationSettings = LocationSettings(
     accuracy: LocationAccuracy.high,
     distanceFilter: 0,
@@ -49,7 +49,6 @@ class _HomeState extends State<Home> {
     AutoReply().runIncomingSmsHandler(telephony);
     AwesomeNotifications().dismiss(1);
     get_current_location();
-
   }
 
   void get_current_location() async {
@@ -59,13 +58,14 @@ class _HomeState extends State<Home> {
     double previous_speed = 0;
     int count_stop_time = 0;
     int filter_out_first_two_data =
-    0; //to clear out any anomalies that appear at the beginning
+        0; //to clear out any anomalies that appear at the beginning
     int notification_count = 0;
     bool first_load = true;
     String current_state = "";
 
     Geolocator.getPositionStream(locationSettings: locationSettings)
         .listen((Position? position) async {
+      bool is_safedriving_automatic = await SafeDriving().is_automatic();
       if (filter_out_first_two_data < 2) {
         filter_out_first_two_data += 1;
         return;
@@ -75,10 +75,14 @@ class _HomeState extends State<Home> {
         try {
           List<Placemark> location = await placemarkFromCoordinates(
               position.latitude, position.longitude);
-          current_state =
-              location.toList()[0].toString().split(",").toList()[5]
-                  .toString()
-                  .split(":")[1].replaceAll(" ", "");
+          current_state = location
+              .toList()[0]
+              .toString()
+              .split(",")
+              .toList()[5]
+              .toString()
+              .split(":")[1]
+              .replaceAll(" ", "");
         } on PlatformException {
           print("Could not find location");
         }
@@ -86,44 +90,26 @@ class _HomeState extends State<Home> {
         if (previous_latitude == 0 || previous_longitude == 0) {
           previous_longitude = position.longitude;
           previous_latitude = position.latitude;
-          previous_seconds = DateTime
-              .now()
-              .hour * 3600 +
-              DateTime
-                  .now()
-                  .minute * 60 +
-              DateTime
-                  .now()
-                  .second;
+          previous_seconds = DateTime.now().hour * 3600 +
+              DateTime.now().minute * 60 +
+              DateTime.now().second;
           // +(DateTime.now().millisecond / 1000) +
           // (DateTime.now().microsecond / 1000000)) -
         } else {
           double distance = Geolocator.distanceBetween(previous_latitude,
               previous_longitude, position.latitude, position.longitude);
-          int time = (DateTime
-              .now()
-              .hour * 3600 +
-              DateTime
-                  .now()
-                  .minute * 60 +
-              DateTime
-                  .now()
-                  .second) -
+          int time = (DateTime.now().hour * 3600 +
+                  DateTime.now().minute * 60 +
+                  DateTime.now().second) -
               // +(DateTime.now().millisecond / 1000) +
               // (DateTime.now().microsecond / 1000000)) -
               previous_seconds;
           speed =
               (distance * 0.00062137) / (time * 0.000277778); //in miles per hr
           print("distance:$distance time:$time speed:$speed");
-          previous_seconds = DateTime
-              .now()
-              .hour * 3600 +
-              DateTime
-                  .now()
-                  .minute * 60 +
-              DateTime
-                  .now()
-                  .second;
+          previous_seconds = DateTime.now().hour * 3600 +
+              DateTime.now().minute * 60 +
+              DateTime.now().second;
           // + (DateTime.now().millisecond / 1000) +
           // (DateTime.now().microsecond / 1000000);
           previous_longitude = position.longitude;
@@ -139,8 +125,10 @@ class _HomeState extends State<Home> {
           //taking usain bolt's top speed and this data "One estimate is that about 5 percent of pedestrians would die when struck by a vehicle traveling 20 mph at impact" by one.nhtsa.gov"
           //into reference (15mph is very fast even for runners)
           setState(() {
-            mainButtonPressed = true;
-            SafeDriving().turn_on();
+            if (is_safedriving_automatic) {
+              mainButtonPressed = true;
+              SafeDriving().turn_on();
+            }
           });
           if (notification_count == 0) {
             //run this in background mode
@@ -163,13 +151,14 @@ class _HomeState extends State<Home> {
         } else {
           driver_action = "idle";
           if (previous_speed < 2) {
-
             count_stop_time += 1;
             // print("stop time $count_stop_time");
             if (count_stop_time == 5) {
               //~1min 20 seconds - 1 minute
               //Forbush said the typical light cycle is 120 seconds, meaning the longest you would ever sit at a red light is one and half to two minutes.
-              SafeDriving().turn_off();
+              if (is_safedriving_automatic) {
+                SafeDriving().turn_off();
+              }
               count_stop_time = 0;
             }
           } else {
@@ -226,7 +215,6 @@ class _HomeState extends State<Home> {
                 mainButtonPressed = saved_setting;
                 page_index = 0;
                 AwesomeNotifications().dismiss(1);
-
               });
               Navigator.pop(context);
             }),
@@ -234,7 +222,6 @@ class _HomeState extends State<Home> {
             title: const Text("Auto-reply", style: TextStyle(fontSize: 20)),
             onTap: () {
               setState(() {
-
                 page_index = 1;
               });
               Navigator.pop(context);
@@ -292,7 +279,6 @@ class _HomeState extends State<Home> {
             visible: page_index == 0 ? true : false,
             //the main button is visible only in the homepage
             child: FloatingActionButton.large(
-
               backgroundColor:
                   mainButtonPressed ? Colors.lightGreen : Colors.red,
               onPressed: () async {
@@ -318,9 +304,9 @@ class _HomeState extends State<Home> {
         floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
         body: Center(
             child: page_index == 0
-            ?
+                ?
                 // AdvancedSettings()
-            buildHomePage(context)
+                buildHomePage(context)
                 : pages[page_index - 1]));
   }
 }

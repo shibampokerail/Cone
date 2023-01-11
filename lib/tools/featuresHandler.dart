@@ -91,4 +91,19 @@ class SafeDriving {
   void permission(context) {
     getDoNotDisturbPermission(context);
   }
+
+  Future<bool> is_automatic() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool _is_safe_driving_on = (prefs.getBool('auto_safedriving_mode') ?? false);
+    print("Auto Safe Driving is " + (_is_safe_driving_on ? "On" : "Off"));
+    return _is_safe_driving_on;
+  }
+  void turn_on_automatic() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("auto_safedriving_mode",true);
+  }
+  void turn_off_automatic() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool("auto_safedriving_mode",false);
+  }
 }
