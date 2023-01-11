@@ -34,7 +34,7 @@ class _HomeState extends State<Home> {
   double speed = 0;
   double speed2 = 0;
   String state = "";
-
+  // ask for location lettings
   final LocationSettings locationSettings = LocationSettings(
     accuracy: LocationAccuracy.high,
     distanceFilter: 0,
