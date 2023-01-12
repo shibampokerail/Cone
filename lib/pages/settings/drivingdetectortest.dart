@@ -1,26 +1,28 @@
 import 'package:flutter/services.dart';
-import 'package:geocoding/geocoding.dart';
+import 'package:geocoding/geocoding.dart' as geocode;
 import 'package:geolocator_android/geolocator_android.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:new_app/tools/featuresHandler.dart';
 import 'package:new_app/custom_widgets/notifiers.dart';
 import 'package:new_app/tools/speed_limit.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:location/location.dart';
 
 
-class DetectDriving {
-  String driver_action = "....";
+class DetectDriving{
+  Location location = new Location();
   double speed = 0;
   double speed2 = 0;
   String state = "";
+  String driver_action = "";
 
-  final LocationSettings locationSettings = LocationSettings(
-    accuracy: LocationAccuracy.high,
-    distanceFilter: 0,
-    // timeLimit: Duration(seconds: 20)
-  );
 
   void get_current_location() async {
+    bool _serviceEnabled;
+    PermissionStatus _permissionGranted;
+    LocationData _locationData;
+
     double previous_latitude = 0;
     double previous_longitude = 0;
     int previous_seconds = 0;
@@ -32,8 +34,31 @@ class DetectDriving {
     bool first_load = true;
     String current_state = "";
 
-    Geolocator.getPositionStream(locationSettings: locationSettings)
-        .listen((Position? position) async {
+    _serviceEnabled = await location.serviceEnabled();
+    if (!_serviceEnabled) {
+      _serviceEnabled = await location.requestService();
+      if (!_serviceEnabled) {
+        return;
+      }
+    }
+
+    _permissionGranted = await location.hasPermission();
+    if (_permissionGranted == PermissionStatus.denied) {
+      _permissionGranted = await location.requestPermission();
+      if (_permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+
+    location.enableBackgroundMode(enable: true);
+    location.onLocationChanged.listen((LocationData position) async {
+      double latitude = await Future.value(position.latitude);
+      double longitude =await Future.value(position.longitude);
+      double plugin_speed = await Future.value(position.speed);
+
+      bool is_safedriving_automatic = await  SafeDriving().is_automatic();
+      bool is_safedriving =  await SafeDriving().is_running();
+
       if (filter_out_first_two_data < 2) {
         filter_out_first_two_data += 1;
         return;
@@ -41,8 +66,8 @@ class DetectDriving {
 
       if (position != null) {
         try {
-          List<Placemark> location = await placemarkFromCoordinates(
-              position.latitude, position.longitude);
+          List<geocode.Placemark> location = await geocode.placemarkFromCoordinates(
+              latitude, longitude);
           current_state =
               location.toList()[0].toString().split(",").toList()[5]
                   .toString()
@@ -50,10 +75,10 @@ class DetectDriving {
         } on PlatformException {
           print("Could not find location");
         }
-        print(current_state);
+        // print(current_state);
         if (previous_latitude == 0 || previous_longitude == 0) {
-          previous_longitude = position.longitude;
-          previous_latitude = position.latitude;
+          previous_longitude = longitude;
+          previous_latitude = latitude;
           previous_seconds = DateTime
               .now()
               .hour * 3600 +
@@ -67,7 +92,7 @@ class DetectDriving {
           // (DateTime.now().microsecond / 1000000)) -
         } else {
           double distance = Geolocator.distanceBetween(previous_latitude,
-              previous_longitude, position.latitude, position.longitude);
+              previous_longitude, latitude, longitude);
           int time = (DateTime
               .now()
               .hour * 3600 +
@@ -94,23 +119,30 @@ class DetectDriving {
                   .second;
           // + (DateTime.now().millisecond / 1000) +
           // (DateTime.now().microsecond / 1000000);
-          previous_longitude = position.longitude;
-          previous_latitude = position.latitude;
+          previous_longitude = longitude;
+          previous_latitude = latitude;
         }
       }
 
       if (position != null && !first_load && speed < 200) {
         //this is for unrealistic values | unless you are driving a bugatti
-        speed2 = position.speed * (0.00062137) / 0.000277778;
+        speed2 = plugin_speed * (0.00062137) / 0.000277778;
         state = current_state;
         if (speed > 14) {
           //taking usain bolt's top speed and this data "One estimate is that about 5 percent of pedestrians would die when struck by a vehicle traveling 20 mph at impact" by one.nhtsa.gov"
           //into reference (15mph is very fast even for runners)
-
-          if (notification_count == 0) {
-            createNotification('Are You Driving?',
-                'Tap this to turn on SafeDriving mode.');
-            notification_count = 1;
+          if (is_safedriving_automatic){
+            if (is_safedriving){
+              SafeDriving().turn_on();
+            } else {
+              SafeDriving().turn_off();
+            }
+          } else {
+            if (notification_count == 0) {
+              createNotification(
+                  'Are You Driving?', 'Tap this to turn on SafeDriving mode.');
+              notification_count = 1;
+            }
           }
 
           // bool speed_limit_crossed = is_above_speed_limit(state, speed);
@@ -129,7 +161,7 @@ class DetectDriving {
           if (previous_speed < 2) {
             count_stop_time += 1;
             // print("stop time $count_stop_time");
-            if (count_stop_time == 40) {
+            if (count_stop_time == 5) {
               //~1min 20 seconds - 1 minute
               //Forbush said the typical light cycle is 120 seconds, meaning the longest you would ever sit at a red light is one and half to two minutes.
               SafeDriving().turn_off();
@@ -150,12 +182,7 @@ class DetectDriving {
       // ? 'Unknown'
       //     : '${position.latitude.toString()}, ${position.longitude.toString()}'
       // );
-    }).onError((TimeoutException) {
-      driver_action = "idle";
-      speed = 0;
-
-      // throw TimeoutException("Timeout Exception");
-      get_current_location();
     });
-  }
 }
+}
+

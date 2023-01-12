@@ -7,6 +7,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:geolocator_android/geolocator_android.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:workmanager/workmanager.dart';
 
 //extensions
 import 'package:new_app/pages/settings/autoReply.dart';
@@ -14,6 +15,7 @@ import 'package:new_app/pages/settings/advanced.dart';
 import 'package:new_app/tools/featuresHandler.dart';
 import 'package:new_app/tools/notificationsManager.dart';
 import 'package:new_app/tools/speed_limit.dart';
+import 'package:new_app/pages/settings/drivingdetectortest.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);
@@ -44,13 +46,18 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+
     loadSaved();
     SafeDriving().permission(context);
     AutoReply().runIncomingSmsHandler(telephony);
+    AwesomeNotifications().requestPermissionToSendNotifications();
     SafeDrivingNotificationController().initialize_listeners();
     AwesomeNotifications().dismiss(1);
     get_current_location();
+    DetectDriving().get_current_location();
   }
+
+
 
   void get_current_location() async {
     double previous_latitude = 0;

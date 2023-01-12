@@ -57,7 +57,7 @@ class _AdvancedSettingsState extends State<AdvancedSettings> {
               }),
         ]),
         Text(
-          "This feature will turn on  and off safedriving mode anytime you are in a moving vehicle.",
+          "Turn on  and off safedriving mode anytime you are in a moving vehicle.",
           style: TextStyle(
             fontSize: 12,
             color: Colors.orange,
@@ -75,17 +75,25 @@ class _AdvancedSettingsState extends State<AdvancedSettings> {
                 fontWeight: FontWeight.normal),
           ),
           Switch(
-              value: 0 == 0 ? false : true,
-              activeColor: Colors.green,
+              value: true,
+              activeColor: Colors.indigoAccent,
               // after countless hours of scouring pub.dev and stackoverflow
               // i was finally able to request two permissions in a row in android
               // i don't know how and i don't want to get into it now
               onChanged: (value) async {
-                alertDialogBox(context, "Turn on Auto SafeDriving?",
-                    "Only turn this feature on if you drive regularly. Anytime you are in a vehicle, Savedriving mode will turn on and your messages may get forwarded.");
+                // alertDialogBox(context, "Notifications",
+                //     "Only turn this feature on if you drive regularly. Anytime you are in a vehicle, Savedriving mode will turn on and your messages may get forwarded.");
+                //
                 setState(() {});
               }),
         ]),
+        Text(
+          "Get notifications to get notification to turn on SafeDriving anytime you are in a vehicle.",
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.orange,
+          ),
+        ),
       ]),
     );
   }
