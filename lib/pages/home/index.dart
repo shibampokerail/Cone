@@ -256,18 +256,41 @@ class _HomeState extends State<Home> {
   Widget buildHomePage(BuildContext context) {
     return ListView(
       children: [
+        SizedBox(height:25),
         Center(
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
               "SafeDriving:" + (mainButtonPressed ? "On" : "Off"),
               style: TextStyle(
-                  fontSize: 35,
+                  fontSize: 40,
                   color: Colors.black,
+                  fontWeight: FontWeight.bold,
+
+              ),
+            ),
+          ),
+        ),
+        SizedBox(height:120),
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text("Safety Points"
+              ,
+              style: TextStyle(
+                  fontSize: 30,
+                  color: Colors.indigo,
                   fontWeight: FontWeight.bold),
             ),
           ),
         ),
+        Center(
+          child: Text("0",  style: TextStyle(
+              fontSize: 130,
+              color: Colors.lightGreen,
+              fontWeight: FontWeight.bold)),
+        ),
+        MaterialButton(height: 20,onPressed: (){},)
       ],
     );
   }
@@ -279,7 +302,9 @@ class _HomeState extends State<Home> {
           title: Text("CONE"),
           centerTitle: true,
           backgroundColor: Colors.orange,
+          elevation: 0,
         ),
+        backgroundColor: Colors.white,
         drawer: Drawer(
           child: _buildAppDrawer(context),
         ),
@@ -287,6 +312,7 @@ class _HomeState extends State<Home> {
             visible: page_index == 0 ? true : false,
             //the main button is visible only in the homepage
             child: FloatingActionButton.large(
+              elevation: 0,
               backgroundColor:
                   mainButtonPressed ? Colors.lightGreen : Colors.red,
               onPressed: () async {

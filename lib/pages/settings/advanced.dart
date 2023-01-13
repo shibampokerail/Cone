@@ -88,7 +88,7 @@ class _AdvancedSettingsState extends State<AdvancedSettings> {
               }),
         ]),
         Text(
-          "Get notifications to get notification to turn on SafeDriving anytime you are in a vehicle.",
+          "Get notifications to turn on SafeDriving anytime you are in a vehicle.",
           style: TextStyle(
             fontSize: 12,
             color: Colors.orange,

@@ -1,3 +1,4 @@
+import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/services.dart';
 import 'package:geocoding/geocoding.dart' as geocode;
 import 'package:geolocator_android/geolocator_android.dart';
@@ -9,14 +10,12 @@ import 'package:new_app/tools/speed_limit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:location/location.dart';
 
-
-class DetectDriving{
+class DetectDriving {
   Location location = new Location();
   double speed = 0;
   double speed2 = 0;
   String state = "";
   String driver_action = "";
-
 
   void get_current_location() async {
     bool _serviceEnabled;
@@ -29,10 +28,11 @@ class DetectDriving{
     double previous_speed = 0;
     int count_stop_time = 0;
     int filter_out_first_two_data =
-    0; //to clear out any anomalies that appear at the beginning
+        0; //to clear out any anomalies that appear at the beginning
     int notification_count = 0;
     bool first_load = true;
     String current_state = "";
+    int last_notification_time = 0;
 
     _serviceEnabled = await location.serviceEnabled();
     if (!_serviceEnabled) {
@@ -53,11 +53,11 @@ class DetectDriving{
     location.enableBackgroundMode(enable: true);
     location.onLocationChanged.listen((LocationData position) async {
       double latitude = await Future.value(position.latitude);
-      double longitude =await Future.value(position.longitude);
+      double longitude = await Future.value(position.longitude);
       double plugin_speed = await Future.value(position.speed);
 
-      bool is_safedriving_automatic = await  SafeDriving().is_automatic();
-      bool is_safedriving =  await SafeDriving().is_running();
+      bool is_safedriving_automatic = await SafeDriving().is_automatic();
+      bool is_safedriving = await SafeDriving().is_running();
 
       if (filter_out_first_two_data < 2) {
         filter_out_first_two_data += 1;
@@ -66,12 +66,16 @@ class DetectDriving{
 
       if (position != null) {
         try {
-          List<geocode.Placemark> location = await geocode.placemarkFromCoordinates(
-              latitude, longitude);
-          current_state =
-              location.toList()[0].toString().split(",").toList()[5]
-                  .toString()
-                  .split(":")[1].replaceAll(" ", "");
+          List<geocode.Placemark> location =
+              await geocode.placemarkFromCoordinates(latitude, longitude);
+          current_state = location
+              .toList()[0]
+              .toString()
+              .split(",")
+              .toList()[5]
+              .toString()
+              .split(":")[1]
+              .replaceAll(" ", "");
         } on PlatformException {
           print("Could not find location");
         }
@@ -79,44 +83,26 @@ class DetectDriving{
         if (previous_latitude == 0 || previous_longitude == 0) {
           previous_longitude = longitude;
           previous_latitude = latitude;
-          previous_seconds = DateTime
-              .now()
-              .hour * 3600 +
-              DateTime
-                  .now()
-                  .minute * 60 +
-              DateTime
-                  .now()
-                  .second;
+          previous_seconds = DateTime.now().hour * 3600 +
+              DateTime.now().minute * 60 +
+              DateTime.now().second;
           // +(DateTime.now().millisecond / 1000) +
           // (DateTime.now().microsecond / 1000000)) -
         } else {
-          double distance = Geolocator.distanceBetween(previous_latitude,
-              previous_longitude, latitude, longitude);
-          int time = (DateTime
-              .now()
-              .hour * 3600 +
-              DateTime
-                  .now()
-                  .minute * 60 +
-              DateTime
-                  .now()
-                  .second) -
+          double distance = Geolocator.distanceBetween(
+              previous_latitude, previous_longitude, latitude, longitude);
+          int time = (DateTime.now().hour * 3600 +
+                  DateTime.now().minute * 60 +
+                  DateTime.now().second) -
               // +(DateTime.now().millisecond / 1000) +
               // (DateTime.now().microsecond / 1000000)) -
               previous_seconds;
           speed =
               (distance * 0.00062137) / (time * 0.000277778); //in miles per hr
           print("distance:$distance time:$time speed:$speed");
-          previous_seconds = DateTime
-              .now()
-              .hour * 3600 +
-              DateTime
-                  .now()
-                  .minute * 60 +
-              DateTime
-                  .now()
-                  .second;
+          previous_seconds = DateTime.now().hour * 3600 +
+              DateTime.now().minute * 60 +
+              DateTime.now().second;
           // + (DateTime.now().millisecond / 1000) +
           // (DateTime.now().microsecond / 1000000);
           previous_longitude = longitude;
@@ -131,17 +117,23 @@ class DetectDriving{
         if (speed > 14) {
           //taking usain bolt's top speed and this data "One estimate is that about 5 percent of pedestrians would die when struck by a vehicle traveling 20 mph at impact" by one.nhtsa.gov"
           //into reference (15mph is very fast even for runners)
-          if (is_safedriving_automatic){
-            if (is_safedriving){
+          if (is_safedriving_automatic) {
+            if (!is_safedriving) {
               SafeDriving().turn_on();
-            } else {
-              SafeDriving().turn_off();
             }
           } else {
+            int current_time = DateTime.now().hour * 3600 +
+                DateTime.now().minute * 60 +
+                DateTime.now().second;
+            if (current_time - last_notification_time >
+                2000){} // to send notifications every 30 mins
             if (notification_count == 0) {
               createNotification(
                   'Are You Driving?', 'Tap this to turn on SafeDriving mode.');
               notification_count = 1;
+              last_notification_time = DateTime.now().hour * 3600 +
+                  DateTime.now().minute * 60 +
+                  DateTime.now().second;
             }
           }
 
@@ -164,7 +156,11 @@ class DetectDriving{
             if (count_stop_time == 5) {
               //~1min 20 seconds - 1 minute
               //Forbush said the typical light cycle is 120 seconds, meaning the longest you would ever sit at a red light is one and half to two minutes.
-              SafeDriving().turn_off();
+              if (is_safedriving_automatic) {
+                SafeDriving().turn_off();
+              } else {
+                AwesomeNotifications().dismiss(1);
+              }
               count_stop_time = 0;
             }
           } else {
@@ -183,6 +179,5 @@ class DetectDriving{
       //     : '${position.latitude.toString()}, ${position.longitude.toString()}'
       // );
     });
+  }
 }
-}
-
