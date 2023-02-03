@@ -3,9 +3,9 @@
 An app that helps prevent texting and driving.
 
 ## Features
+- Automatic Safedriving Mode : Turning this on will turn on safedriving mode and turn it off depending the movement of the vehicle(when the user is driving).
 - Safedriving Mode : Turning this on will put the phone in do not disturb mode
-- Autoreply : Turning this on will automatically reply to any incominng messages with a custom message when safedriving mode is on
-- Automatic Safedriving Mode : Turning this on will turn on safedriving mode and turn it off depending the movement of the vehicle a user is driving
+- Autoreply : Turning this on will automatically reply to any incoming messages with a custom message when safedriving mode is on
 - Notifications : If a user is in a vehicle the app will send a silent notification request to turn on safedriving mode
 
 ## Upcoming Features
