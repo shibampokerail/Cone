@@ -16,6 +16,8 @@ An app that helps prevent texting and driving.
 ## Further in the future
 - Get live data of the route where most people are currently texting and driving and label it as dangerous
 
+# FLEXing: made without using AI
+
 ## Usage
 - ![Steps](https://github.com/shibampokerail/Cone/blob/main/Demo.png?raw=true)
 
